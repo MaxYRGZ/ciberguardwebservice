@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import SQLite from 'react-native-sqlite-storage';
 import { useNavigation } from '@react-navigation/native';
 
 interface PreguntaRespuesta {
@@ -14,52 +13,36 @@ const Mesage: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const db = SQLite.openDatabase({ name: 'ciberguard' }, () => {
-      console.log('Database opened');
-    }, (error) => {
-      console.error('Error opening database:', error);
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql('SELECT * FROM preguntas_respuestas', [], (tx, results) => {
-        const rows = results.rows;
-        let preguntasRespuestasList: PreguntaRespuesta[] = [];
-        for (let i = 0; i < rows.length; i++) {
-          preguntasRespuestasList.push(rows.item(i));
+    const fetchPreguntasRespuestas = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/preguntas_respuestas');
+        if (!response.ok) {
+          throw new Error('Error fetching data');
         }
-        console.log('Preguntas y respuestas fetched:', preguntasRespuestasList);
-        setPreguntasRespuestas(preguntasRespuestasList);
-      }, (error) => {
-        console.error('Error executing SELECT query:', error);
-      });
-    });
+        const data = await response.json();
+        setPreguntasRespuestas(data);
+      } catch (error) {
+        console.error('Error fetching preguntas_respuestas:', error);
+      }
+    };
+
+    fetchPreguntasRespuestas();
   }, []);
 
-  const handleDelete = (id: number) => {
-    const db = SQLite.openDatabase({ name: 'ciberguard' }, () => {
-      console.log('Database opened');
-    }, (error) => {
-      console.error('Error opening database:', error);
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        'DELETE FROM preguntas_respuestas WHERE id = ?',
-        [id],
-        (tx, results) => {
-          if (results.rowsAffected > 0) {
-            Alert.alert('Success', 'Pregunta eliminada.');
-            setPreguntasRespuestas((prev) => prev.filter((item) => item.id !== id));
-          } else {
-            Alert.alert('Error', 'Hubo un problema al eliminar la pregunta.');
-          }
-        },
-        (error) => {
-          console.error('Error executing DELETE query:', error);
-          Alert.alert('Error', 'Hubo un problema al eliminar la pregunta.');
-        }
-      );
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/preguntas_respuestas/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error deleting question');
+      }
+      Alert.alert('Success', 'Pregunta eliminada.');
+      setPreguntasRespuestas((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      Alert.alert('Error', 'Hubo un problema al eliminar la pregunta.');
+    }
   };
 
   return (
@@ -143,4 +126,3 @@ const styles = StyleSheet.create({
 });
 
 export default Mesage;
-

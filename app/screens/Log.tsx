@@ -1,19 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import SQLite from 'react-native-sqlite-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../persistance/types';
 
 type LogScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Log'>;
 
-function Log(): React.JSX.Element {
+const Log: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showFingerprint, setShowFingerprint] = useState(false);
   const navigation = useNavigation<LogScreenNavigationProp>();
 
   const handleLogin = () => {
-    navigation.navigate('Home');
+    const db = SQLite.openDatabase(
+      { name: 'ciberguard' },
+      () => { console.log('Database opened'); },
+      (error) => { console.error('Error opening database:', error); }
+    );
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM cuenta WHERE correo = ? AND contraseña = ?',
+        [email, password],
+        (tx, results) => {
+          if (results.rows.length > 0) {
+            navigation.navigate('Home');
+          } else {
+            Alert.alert('Error', 'Correo o contraseña incorrectos.');
+          }
+        },
+        (error) => {
+          console.error('Error executing SELECT query:', error);
+          Alert.alert('Error', 'Hubo un problema al verificar tu cuenta.');
+        }
+      );
+    });
   };
 
   const handleFingerprint = () => {
@@ -75,7 +98,7 @@ const styles = StyleSheet.create({
   IniciarButtonText: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor:'rgb(46, 79, 145)',
+    backgroundColor: 'rgb(46, 79, 145)',
     width: 150,
     height: 40,
     borderRadius: 10,
@@ -136,4 +159,3 @@ const styles = StyleSheet.create({
 });
 
 export default Log;
-
