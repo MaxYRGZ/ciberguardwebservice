@@ -96,3 +96,35 @@ adb devices
 ```bash
 adb -s emulator-5554 reverse tcp:3000 tcp:3000
 ```
+# Installation Instructions
+
+## Prerequisites
+
+The first step to running the application is to install Android Studio. You can download it from the following link:
+[Android Studio](https://developer.android.com/studio?gad_source=1&gclid=Cj0KCQjwsPCyBhD4ARIsAPaaRf0lhgD3uxM9jl7r5KaKuqQcIeQbhjDsI_YxKmWjoDhpUwAQarvC8FAaAi7CEALw_wcB&gclsrc=aw.ds&hl=es-419)
+
+## Steps
+
+1. **Install Android Studio**
+   - Download and install Android Studio from the link above.
+
+2. **Create a Virtual Device**
+   - Open Android Studio and create a virtual device.
+
+3. **Clone the Repository**
+   - Clone the following repository into a folder:
+     ```bash
+     git clone https://github.com/MaxYRGZ/ciberguardwebservice.git
+     ```
+
+4. **Open the Project**
+   - Open the cloned folder in Visual Studio Code.
+
+5. **Start the Application**
+   - Ensure Docker is running and all prerequisites are met.
+   - Run the application with the following command:
+     ```bash
+     npm start
+     ```
+   - With the virtual device running, you will be able to see the application on the emulated mobile device.
+
